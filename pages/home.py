@@ -23,7 +23,8 @@ layout = html.Div(
                         style={"width": "50vw"},
                     ),
                     dcc.Link(
-                        dmc.Button(
+                        id="link-submit",
+                        children=dmc.Button(
                             "Previsualize dataset",
                             id="load-dataset",
                             leftIcon=[DashIconify(icon="fluent:database-plug-connected-20-filled")],
@@ -57,3 +58,15 @@ def update_dataset_URL(input_value, n_clicks):
         time.sleep(0.01)
         return input_value
     return dash.no_update
+
+
+@callback(
+    Output(component_id="load-dataset", component_property="disabled"),
+    Output(component_id="link-submit", component_property="href"),
+    Input(component_id="text-input", component_property="value"),
+    prevent_initial_call=True,
+)
+def disable_button(input_value):
+    if not input_value.startswith("https://zenodo.org/record/"):
+        return True, "/"
+    return False, "/analytics"

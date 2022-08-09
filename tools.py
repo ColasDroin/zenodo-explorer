@@ -4,6 +4,7 @@ import csv
 import json_stream.requests
 from dash import html
 import numpy as np
+import dash_mantine_components as dmc
 
 
 def return_dataset_json(url_zenodo):
@@ -52,3 +53,35 @@ def return_dataset_files(json_data, url_zenodo):
         # log_scale where 10**4, i.e. 10GB is max size
         l_sizes.append(np.log10(f["size"] / 1024**2))
     return l_names, l_links, l_sizes
+
+
+# ! Not used for now
+def create_table_from_df(df):
+    # Convert df to html table
+    columns, values = df.columns, df.values
+    header = [html.Tr([html.Th(col) for col in columns])]
+    rows = [html.Tr([html.Td(cell) for cell in row]) for row in values]
+    table = [html.Thead(header), html.Tbody(rows)]
+
+    # Convert html table to mantine dash component
+    table_mantine = dmc.Table(striped=True, highlightOnHover=True, children=table)
+
+    return table_mantine
+
+
+def create_table_csv(url, n_rows=10):
+    rows = []
+    header = []
+    with closing(requests.get(url, stream=True)) as r:
+        f = (line.decode("utf-8") for line in r.iter_lines())
+        reader = csv.reader(f, delimiter=",", quotechar='"')
+        for idx, l_row in enumerate(reader):
+            if idx == 0:
+                header = [html.Tr([html.Th(col) for col in l_row])]
+            else:
+                rows += [html.Tr([html.Td(cell) for cell in l_row])]
+            if idx > n_rows:
+                break
+
+    table = [html.Thead(header), html.Tbody(rows)]
+    return dmc.Table(striped=True, highlightOnHover=True, children=table)
