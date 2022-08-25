@@ -4,6 +4,7 @@ import dash_mantine_components as dmc
 from dash_iconify import DashIconify
 import dash_bootstrap_components as dbc
 import time
+import random
 
 dash.register_page(__name__, path="/", title="Amazing Zenodo Dataset Explorer")
 
@@ -32,6 +33,13 @@ layout = html.Div(
                             color="cyan",
                         ),
                         href="/analytics",
+                    ),
+                    dmc.Button(
+                        "Generate example link",
+                        id="generate-link",
+                        leftIcon=[DashIconify(icon="carbon:task-star")],
+                        size="xl",
+                        color="cyan",
                     ),
                 ],
             ),
@@ -70,3 +78,21 @@ def disable_button(input_value):
     if not input_value.startswith("https://zenodo.org/record/"):
         return True, "/"
     return False, "/analytics"
+
+
+@callback(
+    Output(component_id="text-input", component_property="value"),
+    Input(component_id="generate-link", component_property="n_clicks"),
+    prevent_initial_call=True,
+)
+def generate_link(n_clicks):
+    if n_clicks is not None:
+        return random.choice(
+            [
+                "https://zenodo.org/record/5887261",
+                "https://zenodo.org/record/3694065",
+                "https://zenodo.org/record/5796200",
+                "https://zenodo.org/record/3631254",
+            ]
+        )
+    return dash.no_update

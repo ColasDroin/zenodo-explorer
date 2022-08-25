@@ -24,79 +24,163 @@ default_stylesheet = [
 
 dash.register_page(__name__, title="Amazing Zenodo Dataset Explorer")
 
-layout = html.Div(
-    children=[
-        dmc.Group(
-            direction="row",
-            align="flex-start",
-            class_name="mt-2",
-            grow=False,
-            children=[
-                dmc.Group(
-                    direction="column",
-                    style={"width": "48vw"},
-                    align="stretch",
+layout = (
+    html.Div(
+        children=[
+            dmc.Paper(
+                dmc.Center(
+                    html.A(
+                        id="header-dataset-url",
+                        children="No dataset selected",
+                        href="#",
+                        target="_blank",
+                    )
+                ),
+                p=20,
+                style={
+                    "height": "5vh",
+                    "width": "100vw",
+                    "z-index": "1000",
+                    "opacity": "0.7",
+                    "border-radius": "0",
+                },
+            ),
+            dmc.Center(
+                html.Div(
                     children=[
-                        dmc.Paper(
+                        dmc.Tabs(
+                            position="center",
+                            grow=False,
                             children=[
-                                dmc.Text(
-                                    id="text-output", color="dimmed", children="No dataset selected"
+                                dmc.Tab(
+                                    label="Graph exploration",
+                                    children=[
+                                        dmc.Center(
+                                            html.Div(
+                                                id="div-network",
+                                                style={
+                                                    "height": "80vh",
+                                                    "width": "80vw",
+                                                    "z-index": "1010",
+                                                },
+                                                className="border border-info rounded",
+                                                children=cyto.Cytoscape(
+                                                    id="cytoscape-graph",
+                                                    style={"width": "100%", "height": "100%"},
+                                                    layout={"name": "cola", "infinite": "true"},
+                                                    stylesheet=default_stylesheet,
+                                                ),
+                                            ),
+                                        ),
+                                    ],
+                                ),
+                                dmc.Tab(
+                                    label="Dataset description",
+                                    children=[
+                                        dmc.Paper(
+                                            children=[
+                                                dcc.Markdown(
+                                                    id="description-output",
+                                                    children="No dataset selected",
+                                                )
+                                            ],
+                                            shadow="lg",
+                                            withBorder=True,
+                                            p=12,
+                                        ),
+                                    ],
+                                ),
+                                dmc.Tab(
+                                    label="Dataset overview",
+                                    children=[
+                                        dmc.Paper(
+                                            children=[
+                                                html.Div(
+                                                    id="overview-output",
+                                                    # color="dimmed",
+                                                    children="No dataset selected",
+                                                ),
+                                            ],
+                                            shadow="lg",
+                                            withBorder=True,
+                                            p=12,
+                                        ),
+                                    ],
+                                ),
+                                dmc.Tab(
+                                    label="List of files",
+                                    children=[
+                                        html.Div(
+                                            id="table-files-output",
+                                            children="No dataset selected",
+                                            className="w-100 h-100",
+                                        )
+                                    ],
                                 ),
                             ],
-                            shadow="lg",
-                            withBorder=True,
-                            p=12,
-                            pl=15,
-                            pr=15,
-                            pb=10,
-                            # class_name="w-100",  # mx-auto",
-                            style={"height": "30vh", "overflow": "scroll"},
                         ),
-                        html.Div(
-                            id="div-network",
-                            style={"height": "60vh", "overflow": "scroll"},
-                            className="border border-info rounded",
-                            children=cyto.Cytoscape(
-                                id="cytoscape-graph",
-                                layout={"name": "spread"},
-                                stylesheet=default_stylesheet,
+                        # dmc.Group(
+                        #     direction="row",
+                        #     align="flex-start",
+                        #     class_name="mt-2",
+                        #     grow=False,
+                        #     children=[
+                        #         dmc.Group(
+                        #             direction="column",
+                        #             style={"width": "45vw"},
+                        #             align="stretch",
+                        #             children=[],
+                        #         ),
+                        #         dmc.Group(
+                        #             direction="column",
+                        #             style={"width": "45vw", "height": "80vh", "overflow": "auto"},
+                        #             align="stretch",
+                        #             children=[
+                        #                 html.Div(
+                        #                     id="div-table",
+                        #                     className="w-100",
+                        #                 ),
+                        #             ],
+                        #         ),
+                        #     ],
+                        # ),
+                        dmc.Drawer(
+                            title="Sample data for file X",
+                            id="drawer-table",
+                            padding="md",
+                            size="60%",
+                            zIndex=1020,
+                            children=html.Div(
+                                id="div-table",
+                                className="w-100",
                             ),
                         ),
-                    ],
-                ),
-                dmc.Group(
-                    direction="column",
-                    style={"width": "48vw", "height": "80vh", "overflow": "auto"},
-                    align="stretch",
-                    children=[
-                        html.Div(
-                            id="div-table",
-                            className="w-100",
+                        dcc.Link(
+                            children=dmc.Button(
+                                "Back to main page", variant="outline", color="orange"
+                            ),
+                            href="/",
+                            style={"position": "absolute", "bottom": "5rem", "right": "5rem"},
                         ),
                     ],
+                    style={
+                        "width": "95vw",
+                        "height": "95vh",
+                        "z-index": "1000",
+                    },
                 ),
-            ],
-        ),
-        dcc.Link(
-            children=dmc.Button("Back to main page", variant="outline", color="orange"),
-            href="/",
-            style={"position": "absolute", "bottom": "5rem", "right": "5rem"},
-        ),
-    ],
-    style={
-        "width": "100%",
-        "height": "100%",
-        "position": "absolute",
-        "overflow": "scroll",
-        "margin-left": "1rem",
-        "margin-right": "1rem",
-    },
+            ),
+        ],
+    ),
 )
 
 
 @callback(
-    Output(component_id="text-output", component_property="children"),
+    Output(component_id="overview-output", component_property="children"),
+    Output(component_id="description-output", component_property="children"),
     Output(component_id="cytoscape-graph", component_property="elements"),
+    Output(component_id="header-dataset-url", component_property="children"),
+    Output(component_id="table-files-output", component_property="children"),
     Input(component_id="dataset-url-store", component_property="data"),
     prevent_initial_call=True,
 )
@@ -116,7 +200,8 @@ def update_dataset_URL(url_zenodo):
                 html.P(dic_metadata["Total size"]),
             ]
         )
-
+        dataset_description = tools.return_dataset_description(json_data)
+        table_files = tools.return_table_files(json_data, url_zenodo)
         # Get files and build graph
         l_names, l_links, l_sizes = tools.return_dataset_files(json_data, url_zenodo)
         title_dataset = dic_metadata["Title"].split("Title: ")[1]
@@ -132,20 +217,34 @@ def update_dataset_URL(url_zenodo):
         # Declare edges
         elements += [{"data": {"source": title_dataset, "target": name}} for name in l_names]
 
-        return div_info_data, elements
+        return div_info_data, dataset_description, elements, dic_metadata["Title"], table_files
     return dash.no_update
 
 
 @callback(
+    Output(component_id="drawer-table", component_property="opened"),
     Output(component_id="div-table", component_property="children"),
+    Output(component_id="drawer-table", component_property="title"),
     Input(component_id="cytoscape-graph", component_property="tapNodeData"),
     prevent_initial_call=True,
 )
 def update_table_click(data):
     if data is not None:
-        if "url" in data:
+        if "url" in data and "label" in data:
             url = data["url"]
+            label = data["label"]
             if url.endswith(".csv"):
-                return tools.create_table_csv(url, n_rows=20)
+                return True, tools.create_table_csv(url, n_rows=20), "Sample data for file " + label
 
+    return dash.no_update
+
+
+@callback(
+    Output(component_id="header-dataset-url", component_property="href"),
+    Input(component_id="dataset-url-store", component_property="data"),
+    prevent_initial_call=False,
+)
+def update_url_header(url_zenodo):
+    if url_zenodo is not None and url_zenodo != "":
+        return url_zenodo
     return dash.no_update

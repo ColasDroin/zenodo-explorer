@@ -2,9 +2,12 @@ import requests
 from contextlib import closing
 import csv
 import json_stream.requests
-from dash import html
+from dash import html, dash_table
+import pandas as pd
 import numpy as np
 import dash_mantine_components as dmc
+import markdownify
+from collections import OrderedDict
 
 
 def return_dataset_json(url_zenodo):
@@ -37,6 +40,11 @@ def return_dataset_info(json_data):
     return dic_metadata
 
 
+def return_dataset_description(json_data):
+    h = markdownify.markdownify(json_data["metadata"]["description"], heading_style="ATX")
+    return h
+
+
 def return_dataset_files(json_data, url_zenodo):
     record_id = url_zenodo.split("/")[-1]
     files = json_data["files"]
@@ -55,6 +63,55 @@ def return_dataset_files(json_data, url_zenodo):
     return l_names, l_links, l_sizes
 
 
+def return_table_files(json_data, url_zenodo):
+    # Browse files and add to table
+    record_id = url_zenodo.split("/")[-1]
+    files = json_data["files"]
+    l_names = []
+    l_links = []
+    l_size = []
+    for f in files:
+        l_names.append(f["key"])
+        link = "https://zenodo.org/record/{}/files/{}".format(record_id, l_names[-1]).replace(
+            " ", "%20"
+        )
+        link_markdown = "[" + link + "](" + link + ")"
+        l_links.append(link_markdown)
+        l_size.append(f["size"] / 1024**2)
+        # size = "{:.2f}".format(f["size"] / 1024**2) + " MB"
+
+    data = OrderedDict(
+        [
+            ("Name", l_names),
+            ("Size (MB)", l_size),
+            ("Link", l_links),
+        ]
+    )
+    df = pd.DataFrame(data)
+    # df["id"] = df.index
+
+    table = dash_table.DataTable(
+        data=df.to_dict("records"),
+        columns=[
+            {"id": x, "name": x, "presentation": "markdown"}
+            if x == "Link"
+            else {"id": x, "name": x}
+            for x in df.columns
+        ],
+        sort_action="native",
+        style_header={"backgroundColor": "rgb(30, 30, 30)", "color": "white"},
+        style_data={
+            "backgroundColor": "rgb(50, 50, 50)",
+            "color": "white",
+            "whiteSpace": "normal",
+            "height": "auto",
+        },
+        style_cell={"overflow": "hidden", "textOverflow": "ellipsis", "maxWidth": 0},
+    )
+
+    return table
+
+
 # ! Not used for now
 def create_table_from_df(df):
     # Convert df to html table
@@ -69,7 +126,7 @@ def create_table_from_df(df):
     return table_mantine
 
 
-def create_table_csv(url, n_rows=10):
+def create_table_csv(url, n_rows=10, max_cols=20):
     rows = []
     header = []
     with closing(requests.get(url, stream=True)) as r:
@@ -77,9 +134,9 @@ def create_table_csv(url, n_rows=10):
         reader = csv.reader(f, delimiter=",", quotechar='"')
         for idx, l_row in enumerate(reader):
             if idx == 0:
-                header = [html.Tr([html.Th(col) for col in l_row])]
+                header = [html.Tr([html.Th(col) for col in l_row[:max_cols]])]
             else:
-                rows += [html.Tr([html.Td(cell) for cell in l_row])]
+                rows += [html.Tr([html.Td(cell) for cell in l_row[:max_cols]])]
             if idx > n_rows:
                 break
 
