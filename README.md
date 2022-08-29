@@ -1,6 +1,6 @@
 # zenodo-explorer
 
-This app provides an esasy way to explore and previsualize all the files available in one Zenodo repository. 
+This app provides an easy way to explore and previsualize all the files available in one Zenodo repository. 
 
 ## How to run
 
