@@ -48,7 +48,7 @@ app.layout = dmc.MantineProvider(
         ),
         dmc.Center(
             dmc.Text(
-                "Made with ❤️ by Carlos, Colas and Diogo for the CERN webfest 2022",
+                "Made with ❤️ by Carlos, Colas and Diogo for the CERN webfest 2022!",
                 style={"color": "white"},
             ),
             style={"position": "absolute", "bottom": 20, "width": "100%"},
