@@ -3,9 +3,12 @@ from contextlib import closing
 import csv
 import json_stream.requests
 from dash import html, dash_table
+import dash_leaflet as dl
+
 import pandas as pd
 import numpy as np
 import dash_mantine_components as dmc
+import dash_bootstrap_components as dbc
 import markdownify
 from collections import OrderedDict
 
@@ -142,3 +145,17 @@ def create_table_csv(url, n_rows=10, max_cols=20):
 
     table = [html.Thead(header), html.Tbody(rows)]
     return dmc.Table(striped=True, highlightOnHover=True, children=table)
+
+def create_geojson_preview(url):
+    with closing(requests.get(url, stream=True)) as r:
+        print(r)
+        preview = dl.Map(dl.TileLayer(), style={'width': '1000px', 'height': '500px'})
+
+        #dl.GeoJSON(url=r, id="capitals")
+    return preview
+
+def warning_non_suported_file(url):
+    if url.strip('.')[-1] not in ['.json', '.csv', '.geojson']:
+        return dbc.Alert("File not suported. Try another one.", color="primary"),
+
+    

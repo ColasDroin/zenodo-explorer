@@ -1,9 +1,17 @@
 import dash
 from dash import html, dcc, callback, Input, Output
 import dash_mantine_components as dmc
+import dash_leaflet as dl
+import requests
+import json
+from contextlib import closing
+
 import tools as tools
 import dash_cytoscape as cyto
 import numpy as np
+
+from urllib.request import urlopen
+
 
 # Cytoscape styling and layout
 cyto.load_extra_layouts()
@@ -14,9 +22,10 @@ default_stylesheet = [
             "width": "mapData(size, 0, 4, 20, 60)",
             "height": "mapData(size, 0, 4, 20, 60)",
             "content": "data(label)",
-            "font-size": "12px",
+            "font-size": "11px",
             "text-valign": "center",
             "text-halign": "center",
+            "color": "white",
         },
     }
 ]
@@ -157,7 +166,7 @@ layout = (
                         ),
                         dcc.Link(
                             children=dmc.Button(
-                                "Back to main page", variant="outline", color="orange"
+                                "Back to main page", variant="outline", color="yellow"
                             ),
                             href="/",
                             style={"position": "absolute", "bottom": "5rem", "right": "5rem"},
@@ -235,6 +244,28 @@ def update_table_click(data):
             label = data["label"]
             if url.endswith(".csv"):
                 return True, tools.create_table_csv(url, n_rows=20), "Sample data for file " + label
+            elif url.endswith(".geojson"):
+                #url = 'https://raw.githubusercontent.com/shawnbot/topogram/master/data/us-states.geojson'
+
+                response = urlopen(url)
+                data_json = json.loads(response.read())
+                data_json["features"] =  data_json["features"][:30]
+
+                # data_json_basic = []
+                # for f in data_json["features"]:
+                #     for c in f["geometry"]["coordinates"][0][0]:
+                #         if type(c) is not float:
+                #             data_json_basic.append({"lat": c[0], "lon": c[1]})
+
+                #{"lat":c[0], "lon": c[1]} for c in f["geometry"]["coordinates"]
+                #print(data_json)
+
+                #return True, dl.Map(dl.GeoJSON(data=data_json, id="geojson"), style={'width': '1000px', 'height': '500px'}), url
+                return True, dl.Map(children=[dl.TileLayer()] + [dl.GeoJSON(data=data_json, id="geojson")], style={'width': '1000px', 'height': '500px'}), url
+
+            
+            else:
+                return True, "File format not supported yet", url
 
     return dash.no_update
 

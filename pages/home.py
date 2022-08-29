@@ -30,7 +30,7 @@ layout = html.Div(
                             id="load-dataset",
                             leftIcon=[DashIconify(icon="fluent:database-plug-connected-20-filled")],
                             size="xl",
-                            color="cyan",
+                            color="blue",
                         ),
                         href="/analytics",
                     ),
@@ -39,7 +39,7 @@ layout = html.Div(
                         id="generate-link",
                         leftIcon=[DashIconify(icon="carbon:task-star")],
                         size="xl",
-                        color="cyan",
+                        color="blue",
                     ),
                 ],
             ),
@@ -90,9 +90,9 @@ def generate_link(n_clicks):
         return random.choice(
             [
                 "https://zenodo.org/record/5887261",
-                "https://zenodo.org/record/3694065",
-                "https://zenodo.org/record/5796200",
-                "https://zenodo.org/record/3631254",
+                # "https://zenodo.org/record/3694065",
+                # "https://zenodo.org/record/5796200",
+                # "https://zenodo.org/record/3631254",
             ]
         )
     return dash.no_update
